@@ -1,106 +1,91 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <string.h>
 #include <stdbool.h>
+#include <time.h>
 
 int count = 0;
-bool stringmatching(char *text, char *pattern, int n, int m)
-{
+
+bool BFSM(char *text, char *pat, int n, int m){
     count = 0;
-    for (int i = 0; i <= (n - m); i++)
-    {
+
+    if (m > n) return false;
+
+    for (int i = 0; i <= n - m; i++){
         int j = 0;
-        while (j < m)
-        {
+        while (j < m){
             count++;
-            if (pattern[j] != text[i + j])
-                break;
+            if (pat[j] != text[i + j]) break;
             j++;
         }
-        if (j == m)
-            return true;
+        if (j == m) return true;
     }
     return false;
 }
 
-void plotter()
-{
-    FILE *f1 = fopen("strbest.txt", "w");
-    FILE *f2 = fopen("strworst.txt", "w");
-    FILE *f3 = fopen("stravg.txt", "w");
-    char *text = (char *)malloc(1000 * sizeof(char));
-    char *pattern;
-    for (int i = 0; i < 1000; i++)
-        *(text + i) = 'a';
-    int m, n;
-    n = 1000;
-    m = 10;
-    while (m <= 1000)
-    {
-        pattern = (char *)malloc(m * sizeof(char));
-        count = 0;
-        for (int i = 0; i < m; i++) // best case
-            pattern[i] = 'a';
-        stringmatching(text, pattern, n, m);
-        fprintf(f1, "%d\t%d\n", m, count);
+void tester(){
+    printf("Enter text length and pattern length: ");
+    int n, m; scanf("%d %d", &n, &m);
 
-        count = 0;
-        pattern[m - 1] = 'b'; // worst case
-        stringmatching(text, pattern, n, m);
-        fprintf(f2, "%d\t%d\n", m, count);
+    char text[100], pat[100];
 
-        count = 0;
-        for (int i = 0; i < m; i++) // avg case
-            pattern[i] = 97 + rand() % 3;
-        stringmatching(text, pattern, n, m);
-        fprintf(f3, "%d\t%d\n", m, count);
-        free(pattern);
-        if (m < 100)
-            m = m + 10;
-        else
-            m = m + 100;
-    }
-}
-
-void tester()
-{
-    int m, n;
-    char text[100], pattern[100];
-    printf("Enter the pattern length: ");
-    scanf("%d", &m);
-    printf("Enter the pattern: ");
-    getchar();
-    fgets(pattern, sizeof(pattern), stdin);
-    pattern[strcspn(pattern, "\n")] = '\0';
-    printf("Enter the text length: ");
-    scanf("%d", &n);
-    printf("Enter the text: ");
+    printf("Enter text: ");
     getchar();
     fgets(text, sizeof(text), stdin);
-    pattern[strcspn(text, "\n")] = '\0';
-    bool comparisons = stringmatching(text, pattern, n, m);
-     if (comparisons) {
-        printf("\nPattern '%s' matched with Text '%s'\n", pattern, text);
-    } else {
-        printf("\nPattern '%s' doesn't match with the Text '%s'\n", pattern, text);
+    text[strcspn(text, "\n")] = '\0';
+
+    printf("Enter pattern: ");
+    getchar();
+    fgets(pat, sizeof(pat), stdin);
+    pat[strcspn(pat, "\n")] = '\0';
+
+    if (BFSM(text, pat, n, m)) printf("Pattern matched!\n");
+    else printf("Pattern didn't match!\n");
+}
+
+void writeFiles(const char *bestFile, const char *worstFile, bool (*matchAlgo)(char *, char *, int, int)){
+    FILE *fb, *fw;
+    fb = fopen(bestFile, "w");
+    fw = fopen(worstFile, "w");
+
+    int n = 1000;
+    int m = 10;
+
+    char *text = (char *)malloc(n * sizeof(char));
+    for (int i = 0; i < n; i++) text[i] = 'a';
+
+    while (m <= 1000){
+        char *pat = (char *)malloc(m * sizeof(char));
+
+        // best case
+        for (int i = 0; i < m; i++) pat[i] = 'a';
+        matchAlgo(text, pat, n, m);
+        fprintf(fb, "%d\t%d\n", m, count);
+
+        // worst case
+        pat[m - 1] = 'b';
+        matchAlgo(text, pat, n, m);
+        fprintf(fw, "%d\t%d\n", m, count);
+
+        free(pat);
+        m = (m < 100)? m * 10: m + 100;
     }
 }
 
-void main()
-{
-    int ch;
-    printf("Enter \n1.Tester\n2.Plotter\n");
-    scanf("%d", &ch);
-    switch (ch)
-    {
-    case 1:
-        tester();
-        break;
-    case 2:
-        plotter();
-        break;
-    default:
-        printf("Invalid choice.\n");
-    }
+void plotter(){
+    printf("Generating Files...\n");
+    writeFiles("best-BFSM.txt", "worst-BFSM.txt", BFSM);
+    printf("Files generated successfully!\n");
+}
+
+int main(){
+    printf("1. Tester\n2. Plotter\n");
+    printf("Enter your choice: ");
+    int choice; scanf("%d", &choice);
+
+    if (choice == 1) tester();
+    else if (choice == 2) plotter();
+    else printf("Invalid choice!\n");
+    
+    return 0;
 }
