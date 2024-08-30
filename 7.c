@@ -1,106 +1,78 @@
 #include <stdio.h>
-#include <stdlib.h>
 
-int isCycle = 0, components = 0, n, opcount = 0, isTester = 0;
+int n, count = 0;
+int isTester, cycle = 0;
+int components = 0;
 
-void dfs(int mat[n][n], int *vis, int source, int par)
-{
+void dfs(int mat[n][n], int *vis, int source, int par){
     vis[source] = 1;
 
-    if (isTester)
-        printf("%d ", source);
+    if (isTester) printf("%d ", source);
 
-    for (int i = 0; i < n; i++)
-    {
-        opcount++;
-        if (mat[source][i] && vis[i] && i != par)
-            isCycle = 1;
-        else if (mat[source][i] && !vis[i])
-            dfs(mat, vis, i, source);
+    for (int i = 0; i < n; i++){
+        count++;
+        if (i != par && mat[source][i] && vis[i]) cycle = 1;
+        else if (mat[source][i] && !vis[i]) dfs(mat, vis, i, source);
     }
 }
 
-void checkConnectivity(int mat[n][n])
-{
+void checkConn(int mat[n][n]){
     int vis[n], k = 1;
+    for (int i = 0; i < n; i++) vis[i] = 0;
 
-    for (int i = 0; i < n; i++)
-        vis[i] = 0;
-
-    for (int i = 0; i < n; i++)
-        if (!vis[i])
-        {
+    for (int i = 0; i < n; i++){
+        if (!vis[i]){
             components++;
-
-            if (isTester)
-                printf("\nComponent %d: ", k++);
+            if (isTester) printf("Connected component %d: ", k++);
             dfs(mat, &vis[0], i, -1);
         }
+    }
 }
 
-void tester()
-{
+void tester(){
     isTester = 1;
-    printf("Enter the number of vertices\n");
-    scanf("%d", &n);
-    int adjMat[n][n];
-    printf("Enter the adjacency matrix :\n");
+
+    printf("Enter number of vertices: "); scanf("%d", &n);
+    int mat[n][n];
+    printf("Enter adjacency matrix:\n");
     for (int i = 0; i < n; i++)
         for (int j = 0; j < n; j++)
-            scanf("%d", &adjMat[i][j]);
+            scanf("%d", &mat[i][j]);
 
-    checkConnectivity(adjMat);
-
-    printf("\nThe number of connected components :%d\n", components);
-
-    if (isCycle)
-        printf("Cycle exists\n");
-    else
-        printf("Cycle doesnot exists\n");
+    checkConn(mat);
+    printf("\nNumber of connected components: %d\n", components);
+    if (cycle) printf("Graph is Cyclic!\n");
+    else printf("Graph is Acyclic!\n");
 }
 
-void plotter()
-{
-    FILE *f1 = fopen("dfsadjMat.txt", "w");
+void plotter(){
+    printf("Generating files...\n");
+
     isTester = 0;
+    FILE *f = fopen("dfs.txt", "w");
 
-    for (int k = 1; k <= 10; k++)
-    {
+    for (int k = 1; k <= 10; k++){
         n = k;
-        int adjMat[n][n];
-
+        int mat[n][n];
         for (int i = 0; i < n; i++)
-        {
             for (int j = 0; j < n; j++)
-            {
-                if (i != j)
-                    adjMat[i][j] = 1;
-                else
-                    adjMat[i][j] = 0;
-            }
-        }
-        opcount = 0;
-        checkConnectivity(adjMat);
-        fprintf(f1, "%d\t%d\n", n, opcount);
+                mat[i][j] = (i == j)? 0: 1;
+        
+        count = 0;
+        checkConn(mat);
+        fprintf(f, "%d\t%d\n", n, count);
     }
-    fclose(f1);
+    printf("Files generated successfully!\n");
 }
 
-void main()
-{
-    int choice;
-    printf("Enter\n1.Tester\n2.Plotter\n");
-    scanf("%d", &choice);
+int main(){
+    printf("1. Tester\n2. Plotter\n");
+    printf("Enter your choice: ");
+    int choice; scanf("%d", &choice);
 
-    switch (choice)
-    {
-    case 1:
-        tester();
-        break;
-    case 2:
-        plotter();
-        break;
-    default:
-        printf("Invalid choice");
-    }
+    if (choice == 1) tester();
+    else if (choice == 2) plotter();
+    else printf("Invalid choice!\n");
+    
+    return 0;
 }
