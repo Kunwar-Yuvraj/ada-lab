@@ -1,127 +1,99 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
-int isCycle = 0, components = 0, n, opcount = 0, isTester;
+int n, count = 0;
+int isTester;
+int cycle = 0;
+int components = 0;
 
-void bfs(int mat[n][n], int *vis, int source)
-{
-    int queue[n], parent[n];
-    int rear = -1, front = -1;
+void bfs(int mat[n][n], int *vis, int source){
+    count = 0;
+    int q[n], parent[n];
+    int f = -1, r = -1;
+
     vis[source] = 1;
-    queue[++rear] = source;
-    parent[rear] = -1;
-    while (rear != front)
-    {
-        int curr = queue[++front];
-        int par = parent[front];
-        if (isTester)
-            printf("%d ", curr);
-        for (int i = 0; i < n; i++)
-        {
-            opcount++;
-            if (i != par && mat[curr][i] && vis[i])
-                isCycle = 1;
-            if (mat[curr][i] && !vis[i])
-            {
-                queue[++rear] = i;
-                parent[rear] = curr;
+    q[++r] = source;
+    parent[r] = -1;
+
+    while (f != r){
+        int cur = q[++f];
+        int par = parent[f];
+
+        if (isTester) printf("%d ", cur);
+
+        for (int i = 0; i < n; i++){
+            count ++;
+
+            if (i != par && mat[cur][i] && vis[i]) cycle = 1;
+            if (mat[cur][i] && !vis[i]){
                 vis[i] = 1;
+                q[++r] = i;
+                parent[r] = cur;
             }
         }
     }
 }
 
-void checkConnectivity(int mat[n][n])
-{
+void checkConn(int mat[n][n]){
     int vis[n], k = 1;
-    for (int i = 0; i < n; i++)
-    {
-        vis[i] = 0;
-    }
-    for (int i = 0; i < n; i++)
-    {
-        if (vis[i] == 0)
-        {
+    for (int i = 0; i < n; i++) vis[i] = 0;
+
+    for (int i = 0; i < n; i++){
+        if (vis[i] == 0){
             components++;
-            if (isTester)
-                printf("\nConnected component %d: ", k++);
+            if (isTester) printf("Connected component %d: ", k++);
             bfs(mat, &vis[0], i);
         }
     }
 }
 
-void tester()
-{
+void tester(){
     isTester = 1;
-    printf("Enter number of vertices :\n");
-    scanf("%d", &n);
-    int adjMat[n][n];
-    printf("Enter the adjacency matrix :\n");
+    printf("Enter number of vertices: "); scanf("%d", &n);
+
+    int mat[n][n];
+    printf("Enter adjacency matrix:\n");
     for (int i = 0; i < n; i++)
-    {
         for (int j = 0; j < n; j++)
-        {
-            scanf("%d", &adjMat[i][j]);
-        }
-    }
+            scanf("%d", &mat[i][j]);
 
-    checkConnectivity(adjMat);
-    printf("\nNumber of connected components in the graph: %d", components);
+    checkConn(mat);
+    printf("\nNumber of connected components in graph: %d\n", components);
 
-    if (isCycle == 1)
-    {
-        printf("\nCycle exists\n");
-    }
-    else
-    {
-        printf("\nCycle doesnot exists\n");
-    }
+    if (cycle == 1) printf("Graph is Cyclic!\n");
+    else printf("Graph is Acyclic!\n");
 }
 
-void plotter()
-{
+void plotter(){
     isTester = 0;
-    FILE *f1 = fopen("bfsadjMat.txt", "w");
-    for (int k = 1; k <= 10; k++)
-    {
-        n = k;
-        int adjMat[n][n];
 
-        for (int i = 0; i < n; i++)
-        {
-            for (int j = 0; j < n; j++)
-            {
-                if (i != j)
-                {
-                    adjMat[i][j] = 1;
-                }
-                else
-                {
-                    adjMat[i][j] = 0;
-                }
+    printf("Generating files...\n");
+
+    FILE *f = fopen("bfs.txt", "w");
+    
+    for (int k = 1; k <= 10; k++){
+        n = k;
+        int mat[n][n];
+        for (int i = 0; i < n; i++){
+            for (int j = 0; j < n; j++){
+                mat[i][j] = (i == j)? 0: 1;
             }
         }
-        opcount = 0;
-        checkConnectivity(adjMat);
-        fprintf(f1, "%d\t%d\n", n, opcount);
+        checkConn(mat);
+        fprintf(f, "%d\t%d\n", n, count);
     }
-    fclose(f1);
+    printf("Files generated successfully!\n");
 }
 
-void main()
-{
-    int choice;
-    printf("Enter\n1.Tester\n2.Plotter\n");
-    scanf("%d", &choice);
-    switch (choice)
-    {
-    case 1:
-        tester();
-        break;
-    case 2:
-        plotter();
-        break;
-    default:
-        printf("Invalid choice");
-    }
+int main(){
+    printf("1. Tester\n2. Plotter\n");
+    printf("Enter your choice: ");
+    int choice; scanf("%d", &choice);
+
+    if (choice == 1) tester();
+    else if (choice == 2) plotter();
+    else printf("Invalid choice!\n");
+    
+    return 0;
 }
