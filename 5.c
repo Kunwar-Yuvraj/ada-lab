@@ -2,49 +2,61 @@
 #include <stdlib.h>
 #include <time.h>
 
-int count;
+int count = 0;
 
-void merge(int *arr, int beg, int mid, int end)
-{
-    int i, j, k;
+void merge(int *a, int beg, int mid, int end){
     int n1 = (mid - beg) + 1;
-    int n2 = end - mid;
+    int n2 = (end - mid);
     int left[n1], right[n2];
-    for (int i = 0; i < n1; i++)
-        left[i] = arr[beg + i];
-    for (int j = 0; j < n2; j++)
-        right[j] = arr[mid + j + 1];
-    i = 0;
-    j = 0;
-    k = beg;
-    while (i < n1 && j < n2)
-    {
+
+    int i, j, k;
+    i=0;
+    j=0;
+    k=beg;
+
+    for (int i = 0; i < n1; i++) left[i] = a[beg + i];
+    for (int j=0; j<n2; j++) right[j]=a[mid+j+1];
+
+    while (i < n1 && j < n2){
         count++;
-        if (left[i] <= right[j])
-            arr[k] = left[i++];
-        else
-            arr[k] = right[j++];
-        k++;
+        if (left[i] < right[j]) a[k++] = left[i++];
+        else a[k++] = right[j++];
     }
-    while (i < n1)
-    {
-        arr[k++] = left[i++];
-    }
-    while (j < n2)
-    {
-        arr[k++] = right[j++];
+
+    while (i < n1) a[k++] = left[i++];
+    while (j < n2) a[k++] = right[j++];
+}
+
+void mergeSort(int *a, int beg, int end){
+    if (beg < end){
+        int mid = beg + (end - beg) / 2;
+        mergeSort(a, beg, mid);
+        mergeSort(a, mid + 1, end);
+        merge(a, beg, mid, end);
     }
 }
 
-void mergeSort(int *arr, int beg, int end)
+void tester()
 {
-    if (beg < end)
-    {
-        int mid = (beg + end) / 2;
-        mergeSort(arr, beg, mid);
-        mergeSort(arr, mid + 1, end);
-        merge(arr, beg, mid, end);
-    }
+    int *arr, n;
+    printf("Enter the number of elements\n");
+    scanf("%d", &n);
+    arr = (int *)malloc(sizeof(int) * n);
+    printf("Enter the array elements:\n");
+
+    for (int i = 0; i < n; i++)
+        scanf("%d", &arr[i]);
+
+    printf("The elments of array before sorting :\n");
+    for (int i = 0; i < n; i++)
+        printf("%d ", arr[i]);
+    printf("\n");
+
+    mergeSort(arr, 0, n - 1);
+    printf("The elements of the array after sorting :\n");
+    for (int i = 0; i < n; i++)
+        printf("%d ", arr[i]);
+    printf("\n");
 }
 
 void worst(int arr[], int beg, int end)
@@ -67,26 +79,6 @@ void worst(int arr[], int beg, int end)
         for (j = i; j < n2; j++)
             arr[j + 1] = b[j];
     }
-}
-
-void tester()
-{
-    int *arr, n;
-    printf("Enter the number of elements\n");
-    scanf("%d", &n);
-    arr = (int *)malloc(sizeof(int) * n);
-    printf("Enter the array elements:\n");
-    for (int i = 0; i < n; i++)
-        scanf("%d", &arr[i]);
-    printf("The elments of array before sorting :\n");
-    for (int i = 0; i < n; i++)
-        printf("%d ", arr[i]);
-    printf("\n");
-    mergeSort(arr, 0, n - 1);
-    printf("The elements of the array after sorting :\n");
-    for (int i = 0; i < n; i++)
-        printf("%d ", arr[i]);
-    printf("\n");
 }
 
 void plotter()
@@ -127,20 +119,14 @@ void plotter()
     printf("Data is entered into file\n");
 }
 
-void main()
-{
-    int ch;
-    printf("Enter your choice: \n\n1.Tester\n2.Plotter\n\n");
-    scanf("%d", &ch);
-    switch (ch)
-    {
-    case 1:
-        tester();
-        break;
-    case 2:
-        plotter();
-        break;
-    default:
-        printf("Invalid choice!!!\n\n");
-    }
+int main(){
+    printf("1. Tester\n2. Plotter\n");
+    printf("Enter your choice: ");
+    int choice; scanf("%d", &choice);
+
+    if (choice == 1) tester();
+    else if (choice == 2) plotter();
+    else printf("Invalid choice!\n");
+    
+    return 0;
 }
